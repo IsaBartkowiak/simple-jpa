@@ -8,7 +8,11 @@ import java.util.List;
  */
 public interface DAO<T> {
     
+    public void create(T obj);
+    public T findById(int id);
+    public void update(T obj);
+    public void delete(T obj);
     public List<T> findAll();
     
-    public T findById(int id);
+    
 }

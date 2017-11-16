@@ -4,9 +4,25 @@
         <servlet-name>IndexServlet</servlet-name>
         <servlet-class>fr.sorbonne.miage.m1.servlets.IndexServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AddServlet</servlet-name>
+        <servlet-class>fr.sorbonne.miage.m1.servlets.AddServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddAuthorServlet</servlet-name>
+        <servlet-class>fr.sorbonne.miage.m1.servlets.AddAuthorServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>IndexServlet</servlet-name>
         <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddServlet</servlet-name>
+        <url-pattern>/add</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddAuthorServlet</servlet-name>
+        <url-pattern>/add-author</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

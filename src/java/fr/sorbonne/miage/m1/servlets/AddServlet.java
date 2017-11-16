@@ -6,6 +6,7 @@ import fr.sorbonne.miage.m1.dao.AuthorDao;
 import fr.sorbonne.miage.m1.dao.DAO;
 import fr.sorbonne.miage.m1.dao.BookDao;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,11 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author eddebbima
+ * @author isa
  */
-public class IndexServlet extends HttpServlet {
+public class AddServlet extends HttpServlet {
     
-    private DAO<Book> bookDao;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -31,10 +31,11 @@ public class IndexServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        bookDao = new BookDao();
-        List<Book> books = bookDao.findAll();
-        request.setAttribute("books", books);
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        
+        AuthorDao authorDao = new AuthorDao();
+        List<Author> authors = authorDao.findAll();
+        request.setAttribute("authors", authors);
+        request.getRequestDispatcher("/add.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -64,17 +65,53 @@ public class IndexServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        if (request.getParameterMap().containsKey("id_del")) {
-            String isbn = request.getParameter("id_del");
+        String isbn = request.getParameter("isbn");
+        String title = request.getParameter("title");
+        String price = request.getParameter("price");
+        String author = request.getParameter("author");
+        
+        
+        //Si les champs ne sont pas tous remplis
+	if(isbn.isEmpty() || title.isEmpty() || price.isEmpty() || author.isEmpty()){
+            String msg_error = "Veuillez saisir le(s) champs suivants : ";
+            //si le isbn est manquant
+            if(isbn.isEmpty()){
+		msg_error += "ISBN ";
+            }
+            //si le title est manquant
+            if(title.isEmpty()){
+		msg_error += "Titre ";
+            }
+            //si le prix est manquant
+            if(price.isEmpty()){
+		msg_error += "Prix ";
+            }
+            
+            if(author.isEmpty()){
+		msg_error += "Auteur ";
+            }
+            
+            
+            request.setAttribute( "title", title );
+            request.setAttribute( "isbn", isbn );
+            request.setAttribute( "price", price );
+            request.setAttribute( "msg_error", msg_error );
+            
+            
+            
+        }else{
+            Book b = new Book(Integer.parseInt(isbn), title, Float.parseFloat(price));
             BookDao bookdao = new BookDao();
-            Book b = bookdao.findById(Integer.parseInt(isbn));
-            bookdao.delete(b);
+            AuthorDao authordao = new AuthorDao();
+            Author a = authordao.findById(Integer.parseInt(author));
+            b.addAuthor(a);           
+            bookdao.create(b);
 
-            request.setAttribute("msg_success", "Livre supprimé !");
+            request.setAttribute( "msg_success", "Livre bien ajouté !");
+            
         }
-
         doGet(request, response);
-
+       
 
     }
 

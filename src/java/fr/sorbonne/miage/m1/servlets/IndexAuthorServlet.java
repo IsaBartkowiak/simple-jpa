@@ -1,25 +1,29 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.sorbonne.miage.m1.servlets;
 
 import fr.sorbonne.miage.m1.beans.Author;
-import fr.sorbonne.miage.m1.beans.Book;
 import fr.sorbonne.miage.m1.dao.AuthorDao;
 import fr.sorbonne.miage.m1.dao.DAO;
-import fr.sorbonne.miage.m1.dao.BookDao;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author eddebbima
+ * @author isa
  */
-public class IndexServlet extends HttpServlet {
+@WebServlet(name = "IndexAuthorServlet", urlPatterns = {"/authors"})
+public class IndexAuthorServlet extends HttpServlet {
     
-    private DAO<Book> bookDao;
-
+    private DAO<Author> authordao;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -31,10 +35,13 @@ public class IndexServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        bookDao = new BookDao();
-        List<Book> books = bookDao.findAll();
-        request.setAttribute("books", books);
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        //get all authors
+        this.authordao = new AuthorDao();
+        List<Author> authors = authordao.findAll();
+        //set authors to request
+        request.setAttribute("authors", authors);
+        request.getRequestDispatcher("/author.jsp").forward(request, response);
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -63,19 +70,7 @@ public class IndexServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        if (request.getParameterMap().containsKey("id_del")) {
-            String isbn = request.getParameter("id_del");
-            BookDao bookdao = new BookDao();
-            Book b = bookdao.findById(Integer.parseInt(isbn));
-            bookdao.delete(b);
-
-            request.setAttribute("msg_success", "Livre supprimé !");
-        }
-
-        doGet(request, response);
-
-
+        processRequest(request, response);
     }
 
     /**
@@ -85,7 +80,7 @@ public class IndexServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "IndexServlet";
+        return "Short description";
     }// </editor-fold>
 
 }

@@ -1,24 +1,32 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.sorbonne.miage.m1.servlets;
 
 import fr.sorbonne.miage.m1.beans.Author;
 import fr.sorbonne.miage.m1.beans.Book;
 import fr.sorbonne.miage.m1.dao.AuthorDao;
-import fr.sorbonne.miage.m1.dao.DAO;
 import fr.sorbonne.miage.m1.dao.BookDao;
+import fr.sorbonne.miage.m1.dao.DAO;
 import java.io.IOException;
-import java.util.List;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author eddebbima
+ * @author isa
  */
-public class IndexServlet extends HttpServlet {
+@WebServlet(name = "EditBookServlet", urlPatterns = {"/edit"})
+public class EditBookServlet extends HttpServlet {
     
     private DAO<Book> bookDao;
+    private Book b;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -31,10 +39,8 @@ public class IndexServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        bookDao = new BookDao();
-        List<Book> books = bookDao.findAll();
-        request.setAttribute("books", books);
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        
+        request.getRequestDispatcher("/edit.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -49,6 +55,10 @@ public class IndexServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String id = request.getParameter("id");
+        this.bookDao = new BookDao();
+        this.b = bookDao.findById(Integer.parseInt(id));
+        request.setAttribute("book", this.b);
         processRequest(request, response);
     }
 
@@ -64,18 +74,36 @@ public class IndexServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        if (request.getParameterMap().containsKey("id_del")) {
-            String isbn = request.getParameter("id_del");
+        String title = request.getParameter("title");
+        String price = request.getParameter("price");
+        
+        //Si les champs ne sont pas tous remplis
+	if(title.isEmpty() || price.isEmpty()){
+            String msg_error = "Veuillez saisir le(s) champs suivants : ";
+  
+            //si le title est manquant
+            if(title.isEmpty()){
+		msg_error += "Titre ";
+            }
+            //si le prix est manquant
+            if(price.isEmpty()){
+		msg_error += "Prix ";
+            }
+            
+            request.setAttribute( "title", title );
+            request.setAttribute( "price", price );
+            request.setAttribute( "msg_error", msg_error );
+            
+        }else{
             BookDao bookdao = new BookDao();
-            Book b = bookdao.findById(Integer.parseInt(isbn));
-            bookdao.delete(b);
+            this.b.setTitle(title);
+            this.b.setPrice(Float.parseFloat(price));
+            bookdao.update(this.b);
 
-            request.setAttribute("msg_success", "Livre supprimé !");
+            request.setAttribute( "msg_success", "Livre bien modifié !");
+            
         }
-
         doGet(request, response);
-
-
     }
 
     /**
@@ -85,7 +113,7 @@ public class IndexServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "IndexServlet";
+        return "Short description";
     }// </editor-fold>
 
 }

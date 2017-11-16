@@ -6,6 +6,7 @@ import fr.sorbonne.miage.m1.dao.AuthorDao;
 import fr.sorbonne.miage.m1.dao.DAO;
 import fr.sorbonne.miage.m1.dao.BookDao;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,11 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author eddebbima
+ * @author isa
  */
-public class IndexServlet extends HttpServlet {
+public class AddAuthorServlet extends HttpServlet {
     
-    private DAO<Book> bookDao;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -31,10 +31,8 @@ public class IndexServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        bookDao = new BookDao();
-        List<Book> books = bookDao.findAll();
-        request.setAttribute("books", books);
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        
+        request.getRequestDispatcher("/add_author.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -64,17 +62,39 @@ public class IndexServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        if (request.getParameterMap().containsKey("id_del")) {
-            String isbn = request.getParameter("id_del");
-            BookDao bookdao = new BookDao();
-            Book b = bookdao.findById(Integer.parseInt(isbn));
-            bookdao.delete(b);
-
-            request.setAttribute("msg_success", "Livre supprimé !");
+        String firstname = request.getParameter("firstname");
+        String lastname = request.getParameter("lastname");
+        
+        
+        //Si les champs ne sont pas tous remplis
+	if(firstname.isEmpty() || lastname.isEmpty()){
+            String msg_error = "Veuillez saisir le(s) champs suivants : ";
+            
+            //si le prénom est manquant
+            if(firstname.isEmpty()){
+		msg_error += "Prénom ";
+            }
+            //si le nom est manquant
+            if(lastname.isEmpty()){
+		msg_error += "Nom ";
+            }
+            
+            request.setAttribute( "firstname", firstname );
+            request.setAttribute( "lastname", lastname );
+            request.setAttribute( "msg_error", msg_error );
+            
+            doGet(request, response);
+            
+        }else{
+            Author a = new Author(firstname, lastname);
+            AuthorDao authorDao = new AuthorDao();
+            authorDao.create(a);
+            request.setAttribute( "msg_success", "Auteur bien ajouté !");
+            
+            javax.servlet.RequestDispatcher rd = request.getRequestDispatcher("/author");
+            rd.forward(request,response);
         }
-
-        doGet(request, response);
-
+       
 
     }
 
